@@ -9,7 +9,11 @@ angular.module('myApp.controllers', [])
 
   $http.get('data/mockdata.json')
     .success(function (data) {
-      $scope.personlist = data;
+      data.forEach( function (person) {
+        /* Century mark is not saved in data, calculate it now */
+        $scope.updatePIC(person, person.year);
+        $scope.personlist.push(person);
+      });
     });
 
   /* Edit person or create new person */
@@ -17,7 +21,7 @@ angular.module('myApp.controllers', [])
     /* if person is falsey, create new person with smallest free id*/
     if (!person) { person = {id: $scope.findFreeID()}; }
     $scope.editedperson = jQuery.extend({}, person); /* clone object so we don't directly edit model */
-    $scope.updatePIC($scope.editedperson.year);
+    $scope.updatePIC($scope.editedperson, $scope.editedperson.year);
     $('#modal').fadeIn(150);
   }
 
@@ -74,8 +78,8 @@ angular.module('myApp.controllers', [])
   }
 
   /* Update Personal Identity Code century character based on year of birth */
-  $scope.updatePIC = function (year) {
-    $scope.editedperson["picchar"] = year >= 2000 ? 'A' : '-';
+  $scope.updatePIC = function (person, year) {
+    person.picchar = year >= 2000 ? 'A' : '-';
   }
 
   /* Find first free id */

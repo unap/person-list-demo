@@ -88,16 +88,3 @@ body {
     left: 5%;
   }
 }
-
-.list-group-item {
-  opacity: 1;
-}
-
-.list-group-item.ng-enter {
-    -webkit-transition: 1s;
-    transition: 1s;
-    opacity: 0;
-}
-.list-group-item.ng-enter-active {
-    opacity: 1;
-}

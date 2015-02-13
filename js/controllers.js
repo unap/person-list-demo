@@ -28,7 +28,14 @@ angular.module('myApp.controllers', [])
   /* Delete person from list */
   $scope.delete = function(person) {
     var idx = $scope.findIndexByID(person.id);
-    $scope.personlist.splice(idx, 1);
+    if (idx > -1) {
+      $scope.personlist.splice(idx, 1);
+    }
+    /* Also remove from checkedlist */
+    idx = $scope.findIndexByID(person.id, $scope.checkedlist);
+    if (idx > -1) {
+      $scope.checkedlist.splice(idx, 1);
+    }
   }
 
   /* Add or remove person from list of 'checked' people */
@@ -36,14 +43,20 @@ angular.module('myApp.controllers', [])
     if (person.checked) {
       $scope.checkedlist.push(person);
     } else {
-      $scope.checkedlist.splice($scope.findIndexByID(person.id, $scope.checkedlist), 1);
+      var idx = $scope.findIndexByID(person.id, $scope.checkedlist);
+      if (idx > -1) {
+        $scope.checkedlist.splice(idx, 1);
+      }
     }
   }
 
   /* Delete checked people from list */
   $scope.deleteChecked = function() {
     $scope.checkedlist.forEach(function(person) {
-      $scope.personlist.splice($scope.findIndexByID(person.id), 1);
+      var idx = $scope.findIndexByID(person.id);
+      if (idx > -1) {
+        $scope.personlist.splice(idx, 1);
+      }
     });
     $scope.checkedlist = [];
   }

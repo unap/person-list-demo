@@ -2,7 +2,12 @@
 
 
 var app = angular.module('myApp', [
-  'ngRoute',
-  'myApp.routes',
+  'ui.bootstrap',
   'myApp.controllers'
 ]);
+
+app.filter('numberFixedLen', function () {
+  return function(a,b){
+    return(1e4+a+"").slice(-b)
+  }
+});

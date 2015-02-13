@@ -3,30 +3,42 @@ body {
   margin-top: 70px;
 }
 
-.btn-delete {
+.row-buttons {
   position: absolute;
-  right: 15px;
   top: 15px;
+  right: 15px;
 }
 
 .form-invalid {
   color: #c9302c;
 }
 
-#topbar {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  z-index: 1030;
-}
-
-#topbar form {
-  padding-top: 15px;
-}
-
-#search {
+#sort-options {
   float: right;
+}
+
+.checkbox-label {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  top: 20px;
+  left: 20px;
+  padding-left: 5px;
+  padding-top: 2px;
+}
+.checkbox-label span.glyphicon {       
+  opacity: 0;       
+}
+.checkbox-label.active span.glyphicon {        
+  opacity: 1;       
+}
+
+.list-group-item-heading, .list-group-item-text {
+  margin-left: 45px;
+}
+
+.list-group {
+  clear: both;
 }
 
 .list-group-item:nth-of-type(odd) {
@@ -63,7 +75,29 @@ body {
 
 #modal .panel{
   position: fixed;
+  width: 40%;
   top: 20%;
-  left: 25%;
-  width: 50%;
+  left: 30%;
+}
+
+@media only screen and (max-width : 768px) {
+  #modal .panel{
+    position: fixed;
+    width: 90%;
+    top: 10%;
+    left: 5%;
+  }
+}
+
+.list-group-item {
+  opacity: 1;
+}
+
+.list-group-item.ng-enter {
+    -webkit-transition: 1s;
+    transition: 1s;
+    opacity: 0;
+}
+.list-group-item.ng-enter-active {
+    opacity: 1;
 }

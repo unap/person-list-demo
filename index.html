@@ -14,28 +14,38 @@
 </head>
 <body ng-controller="MainCtrl">
 
-  <nav id="topbar" class="navbar-inverse">
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
-      <form class="" role="form">
-
-        <button ng-click="editPerson()" class="btn btn-success">
-          <i class="glyphicon glyphicon-plus" ></i>
-          Lisää henkilö
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" ng-click="navbarCollapsed = !navbarCollapsed">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
         </button>
+      </div>
+      <div class="navbar-collapse collapse" collapse="navbarCollapsed">
+        <form class="navbar-form navbar-right" role="form">
+          <div class="form-group">
+            <button ng-click="editPerson()" class="btn btn-success">
+              <i class="glyphicon glyphicon-plus" ></i>
+              Lisää henkilö
+            </button>
 
-        <button ng-click="foo()" class="btn btn-danger">
-          <i class="glyphicon glyphicon-trash" ></i>
-          Poista valitut
-        </button>
-
-        <div id="search" class="form-group">
-          <div class="right-inner-addon">
-            <i class="glyphicon glyphicon-search"></i>
-            <input type="search" class="form-control" placeholder="Etsi" ng-model="search"/>
+            <button ng-click="deleteChecked()" class="btn btn-danger" ng-class="{disabled: checkedlist.length == 0}">
+              <i class="glyphicon glyphicon-trash" ></i>
+              Poista valitut
+            </button>
           </div>
-        </div>
-
-      </form>
+          <div class="form-group">
+            <div class="right-inner-addon">
+              <i class="glyphicon glyphicon-search"></i>
+              <input type="search" class="form-control" placeholder="Etsi" ng-model="search"/>
+            </div>
+          </div>
+          
+        </form>
+      </div><!--/.navbar-collapse -->
     </div>
   </nav>
 
@@ -43,9 +53,130 @@
     <!-- Example row of columns -->
     <div class="row">
       <div class="col-sm-12">
-        <div ng-view></div>
+
+        <span id="sort-options">
+          Järjestysperuste: 
+          <a href="" ng-click="sortOption = 'last_name'">Sukunimi </a>
+          <a href="" ng-click="sortOption = 'first_name'">Etunimi </a>
+          <a href="" ng-click="sortOption = ['year', 'month', 'day']">Syntymäaika </a>
+        </span>
+
+        <!-- list of people -->
+        <div class="list-group">
+          <span class="list-group-item" ng-repeat="person in personlist | filter:search | orderBy:sortOption" ng-click="person.checked = !person.checked; check(person);" >
+            <span class="checkbox-label btn btn-default" ng-class="{'active': person.checked}">
+              <span class="glyphicon glyphicon-ok"></span>
+            </span>
+            <h4 class="list-group-item-heading">
+               <strong>{{person.last_name | uppercase}}</strong>, {{person.first_name}} <small>{{person.email}}</small>
+            </h4>
+            <p class="list-group-item-text">
+               {{person.day}}.{{person.month}}.{{person.year}}
+            </p>
+            <div class="row-buttons">
+              <button class="btn btn-primary btn-right" ng-click="editPerson(person);$event.stopPropagation();">
+                <i class="glyphicon glyphicon-edit" ></i>
+              </button>
+              <button class="btn btn-danger btn-right" ng-click="delete(person);">
+                <i class="glyphicon glyphicon-trash" ></i>
+              </button>
+            </div>
+          </span>
+        </div>
+
+        <!-- Modal panel for editig person details -->
+        <div id ="modal">
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h3 class="panel-title">Muokkaa henkilöä</h3>
+            </div>
+            <form name="myForm" class="form-horizontal" ng-submit="submitForm(myForm.$valid, editedperson)" novalidate>
+              <div class="panel-body">
+
+                <fieldset>
+                <!-- Text input-->
+                <div class="control-group">
+                  <label class="control-label" for="lastname">Sukunimi</label>
+                  <div class="controls">
+                    <input id="lastname" name="lastname" type="text" placeholder="Sukunimi" class="input-large" ng-model="editedperson.last_name" required>
+                    
+                    <span class="form-invalid" ng-show="myForm.lastname.$dirty && myForm.lastname.$invalid">
+                      <span ng-show="myForm.lastname.$error.required">Syötä sukunimi</span>
+                    </span>
+
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="firstname">Etunimi</label>
+                  <div class="controls"> 
+                    <input id="firstname" name="firstname" type="text" placeholder="Etunimi" class="input-large" ng-model="editedperson.first_name" required>
+
+                    <span class="form-invalid" ng-show="myForm.firstname.$dirty && myForm.firstname.$invalid">
+                      <span ng-show="myForm.firstname.$error.required">Syötä etunimi</span>
+                    </span>
+
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="dob">Syntymäaika</label>
+                  <div class="controls">
+                    <input id="day" name="day" type="text" placeholder="pp"     class="input-large" ng-model="editedperson.day" ng-pattern="/^(0?[1-9]|[12][0-9]|3[01])$/" maxlength="2" size="2" required>
+                    <input id="month" name="month" type="text" placeholder="kk" class="input-large" ng-model="editedperson.month" ng-pattern="/^(0?[1-9]|10|11|12)$/" maxlength="2" size="2" required>
+                    <input id="year" name="year" type="text" placeholder="vvvv" class="input-large" ng-model="editedperson.year" ng-pattern="/^(19\d{2}|20\d{2})$/" ng-change="updatePIC(editedperson.year)" maxlength="4" size="4" required>
+
+                    <span class="form-invalid" ng-show="myForm.day.$dirty && myForm.day.$invalid || myForm.day.$dirty && myForm.month.$invalid && myForm.month.$dirty || myForm.year.$invalid && myForm.year.$dirty">
+                      <span ng-show="myForm.day.$error.required">Syötä päivä.</span>
+                      <span ng-show="myForm.day.$error.pattern">Tarkista päivä.</span>
+                      <span ng-show="myForm.month.$error.required">Syötä kuukausi.</span>
+                      <span ng-show="myForm.month.$error.pattern">Tarkista kuukausi.</span>
+                      <span ng-show="myForm.year.$error.required">Syötä vuosi.</span>
+                      <span ng-show="myForm.year.$error.pattern">Tarkista vuosi.</span>
+                    </span>
+                    
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="firstname">Henkilötunnus</label>
+                  <div class="controls">
+                    {{editedperson.day | numberFixedLen:2}}{{editedperson.month | numberFixedLen:2}}{{editedperson.year | limitTo:-2 }}{{editedperson.picchar}}
+                    <input id="pic" name="pic" type="text" placeholder="zzzq" class="input-large" ng-model="editedperson.pic" ng-pattern="/^\d{3}[0-9A-FHJ-NPR-Y]$/" maxlength="4" size="4" required>
+
+                    <span class="form-invalid" ng-show="myForm.pic.$dirty && myForm.pic.$invalid">
+                      <span ng-show="myForm.pic.$error.required">Syötä henkilötunnus.</span>
+                      <span ng-show="myForm.pic.$error.pattern">Tarkista henkilötunnus.</span>
+                    </span>
+
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="email">Sähköpostiosoite</label>
+                  <div class="controls">
+                    <input id="email" name="email" type="email" placeholder="Sähköpostiosoite" class="input-xxlarge" ng-model="editedperson.email" required>
+                    
+                    <span class="form-invalid" ng-show="myForm.email.$dirty && myForm.email.$invalid">
+                      <span ng-show="myForm.email.$error.required">Syötä sähköpostiosoite</span>
+                      <span ng-show="myForm.email.$error.email">Tarkista sähköpostiosoite.</span>
+                    </span>
+
+                  </div>
+                </div>
+
+                </fieldset>
+
+              </div>
+              <div class="panel-footer">
+                <button class="btn btn-success" type="submit" ng-class="{disabled: !myForm.$valid }"><i class="glyphicon glyphicon-ok"></i> Tallenna</button>
+                <a class="btn btn-danger btn-link" ng-click="cancel()">Peruuta</a>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
-    </div>
+    </div> <!-- end of modal panel -->
 
     <hr>
 
@@ -55,9 +186,7 @@
   </div>
 
   <script src="js/vendor/angular.min.js"></script>
-  <script src="js/vendor/angular-route.min.js"></script>
-  <!-- <script src="js/vendor/ui-bootstrap.min.js"></script> -->
-  <script src="js/routes.js"></script>
+  <script src="js/vendor/ui-bootstrap.min.js"></script>  
   <script src="js/controllers.js"></script>
   <script src="js/app.js"></script>
 

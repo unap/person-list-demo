@@ -1,61 +1,91 @@
-angular.module('myApp.controllers', ['ngRoute'])
+angular.module('myApp.controllers', [])
 
-.controller('MainCtrl', function ($scope, $route, $routeParams, $http, $sce, $location) {
-  $scope.personlist = null;
+.controller('MainCtrl', function ($scope, $http) {
+  $scope.personlist = [];
+  $scope.checkedlist = [];
 
-  $http.get('data/personlist.json')
+  $scope.sortOption = 'last_name';
+  $scope.navbarCollapsed = true;
+
+  $http.get('data/mockdata.json')
     .success(function (data) {
       $scope.personlist = data;
-      $scope.personlist.forEach(function(person) {
-        date = new Date(person.dob);
-        person.day = date.getDate();
-        person.month = date.getMonth();
-        person.year = date.getFullYear();
-        person.socialid = formSocialID(person.day, person.month, person.year, person.postfix);
-        delete person.dob;
-      });
     });
 
-    $scope.foo = function() {
-      console.log("foo");
-    }
+  /* Edit person or create new person */
+  $scope.editPerson = function(person) {
+    /* if person is falsey, create new person with smallest free id*/
+    if (!person) { person = {id: $scope.findFreeID()}; }
+    $scope.editedperson = jQuery.extend({}, person); /* clone object so we don't directly edit model */
+    $scope.updatePIC($scope.editedperson.year);
+    $('#modal').fadeIn(150);
+  }
 
-    $scope.editPerson = function(person) {
-      if (person) console.log("Edit person: "+person.last_name+" "+person.first_name);
-      $('#modal').fadeIn(150);
-      $scope.editedperson = jQuery.extend({}, person); /* clone object so we dont directly edit model */
-    }
+  /* Cancel editing person, close modal */
+  $scope.cancel = function() {
+    $('#modal').fadeOut(150);
+  }
 
-    $scope.cancel = function() {
+  /* Delete person from list */
+  $scope.delete = function(person) {
+    var idx = $scope.findIndexByID(person.id);
+    $scope.personlist.splice(idx, 1);
+  }
+
+  /* Add or remove person from list of 'checked' people */
+  $scope.check = function(person) {
+    if (person.checked) {
+      $scope.checkedlist.push(person);
+    } else {
+      $scope.checkedlist.splice($scope.findIndexByID(person.id, $scope.checkedlist), 1);
+    }
+  }
+
+  /* Delete checked people from list */
+  $scope.deleteChecked = function() {
+    $scope.checkedlist.forEach(function(person) {
+      $scope.personlist.splice($scope.findIndexByID(person.id), 1);
+    });
+    $scope.checkedlist = [];
+  }
+
+  /* Save edited person */
+  $scope.submitForm = function(valid, editedperson) {
+    if (valid) {
       $('#modal').fadeOut(150);
-      console.log("Canceled editing.");
-    }
-
-    $scope.delete = function(person) {
-      console.log("Delete person: "+person.last_name+" "+person.first_name);
-    }
-
-    $scope.submitForm = function(valid) {
-      console.log("Form valid:" + valid);
-      if (valid) {
-        $('#modal').fadeOut(150);
-        console.log("Person saved!");
+      var idx = $scope.findIndexByID(editedperson.id);
+      if (idx > -1) {
+        $scope.personlist[idx] = editedperson;
+      } else {
+        $scope.personlist.push(editedperson);
       }
     }
+  }
 
-    /* Forms Finnish Personal Identity Code from date of birth and postfix */
-    var formSocialID = function (day, month, year, postfix) {
-      var centuryMark = year >= 2000 ? 'A' : '-';
-      return socialid = leadZero(day, 2)+leadZero(month, 2)+leadZero(year, 2).substr(2)+centuryMark+postfix;
-    }
-
-    /* Adds leading zeros to numbers */
-    var leadZero = function (num, length) {
-      var r = "" + num;
-      while (r.length < length) {
-          r = "0" + r;
+  /* Find persons array index by person.id, optional list */
+  $scope.findIndexByID = function (id, list) {
+    list = list || $scope.personlist;
+    for (var i = list.length - 1; i >= 0; i--) {
+      if (list[i].id == id) {
+        return i;
       }
-      return r;
+    };
+    return -1;
+  }
+
+  /* Update Personal Identity Code century character based on year of birth */
+  $scope.updatePIC = function (year) {
+    $scope.editedperson["picchar"] = year >= 2000 ? 'A' : '-';
+  }
+
+  /* Find first free id */
+  $scope.findFreeID = function () {
+    var list = $scope.personlist;
+    for (var i = 0, idx = 1; i < list.length; i++) {
+      if (list[i].id == idx) idx++;
+      if (list[i].id > idx) break;
     }
+    return idx;
+  }
 
 });

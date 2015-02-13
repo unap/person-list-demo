@@ -62,7 +62,7 @@
         </span>
 
         <!-- list of people -->
-        <div class="list-group">
+        <div class="list-group" ng-cloak>
           <span class="list-group-item" ng-repeat="person in personlist | filter:search | orderBy:sortOption" ng-click="person.checked = !person.checked; check(person);" >
             <span class="checkbox-label btn btn-default" ng-class="{'active': person.checked}">
               <span class="glyphicon glyphicon-ok"></span>

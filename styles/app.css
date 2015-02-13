@@ -80,6 +80,10 @@ body {
   left: 30%;
 }
 
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
 @media only screen and (max-width : 768px) {
   #modal .panel{
     position: fixed;

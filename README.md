@@ -5,4 +5,4 @@ Demo: http://wiz.fi/personlist/
 
 #### Notes:
 - Finnish Personal Identity Code validity is only checked with regex, not by checksum, so it will accept values that are of correct form but not actually valid.
-- Only accepts people born between 1900-2100
+- Only accepts birth dates between 1900-2100

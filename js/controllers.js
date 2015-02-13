@@ -20,14 +20,9 @@ angular.module('myApp.controllers', [])
   $scope.editPerson = function(person) {
     /* if person is falsey, create new person with smallest free id*/
     if (!person) { person = {id: $scope.findFreeID()}; }
-    $scope.editedperson = jQuery.extend({}, person); /* clone object so we don't directly edit model */
+    $scope.editedperson = angular.copy(person); /* clone object so we don't directly edit model */
     $scope.updatePIC($scope.editedperson, $scope.editedperson.year);
     $('#modal').fadeIn(150);
-  }
-
-  /* Cancel editing person, close modal */
-  $scope.cancel = function() {
-    $('#modal').fadeOut(150);
   }
 
   /* Delete person from list */
@@ -53,17 +48,31 @@ angular.module('myApp.controllers', [])
     $scope.checkedlist = [];
   }
 
+  /* Cancel editing person, close modal */
+  $scope.cancel = function() {
+    $('#modal').fadeOut(150);
+    $scope.resetForm();
+  }
+
   /* Save edited person */
   $scope.submitForm = function(valid, editedperson) {
     if (valid) {
       $('#modal').fadeOut(150);
+      console.log("save: "+JSON.stringify( $scope.editedperson));
       var idx = $scope.findIndexByID(editedperson.id);
       if (idx > -1) {
-        $scope.personlist[idx] = editedperson;
+        $scope.personlist[idx] = angular.copy(editedperson);
       } else {
-        $scope.personlist.push(editedperson);
+        $scope.personlist.push(angular.copy(editedperson));
       }
     }
+    $scope.resetForm();
+  }
+
+  /* Empty the form model and reset validity */
+  $scope.resetForm = function() {
+    $scope.editForm.$setPristine();
+    for (var key in $scope.editedperson) $scope.editedperson[key] = "";
   }
 
   /* Find persons array index by person.id, optional list */
